@@ -48,13 +48,54 @@ This is a research-heavy skill. Use **15-20+ web searches** across these dimensi
 
 Do not move to output until you have real examples for signals. If you cannot find an example for a signal, mark it as "theoretical — no example found" and demote its conviction level.
 
-### Step 3: Generate Brief
+### Step 3: Generate Brief (Draft)
 
 Read the prompt template at `references/PROMPT_TEMPLATE.md` and use it as the output structure.
 
 Follow the template exactly — every section, every table, every validation check. The template is the product.
 
-**Critical quality gates before output:**
+Generate the full brief as a draft, including initial signal hypotheses with your best estimates for validation, volume, and timing.
+
+---
+
+### Step 3b: Signal Validation Loop
+
+After drafting the brief, run a dedicated validation pass on each individual signal (Section 5). This is what separates a useful brief from speculation.
+
+**Determine which search tool is available (in priority order):**
+
+1. **Perplexity MCP** — If available, use it. Perplexity returns synthesized answers with citations, which is ideal for signal validation. Use `sonar-pro` model for deeper research when available.
+2. **Perplexity API via curl** — If the MCP isn't connecting but the user has a Perplexity API key (check environment variable `PERPLEXITY_API_KEY`), call the API directly:
+   ```bash
+   curl -s https://api.perplexity.ai/chat/completions \
+     -H "Authorization: Bearer $PERPLEXITY_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"model":"sonar-pro","messages":[{"role":"user","content":"YOUR QUERY"}]}'
+   ```
+3. **Built-in web search** — If no Perplexity access, use Claude's native web search. Run 1-2 targeted searches per signal.
+4. **No search available** — Generate the brief but mark ALL signals as "⚠️ Unvalidated — no search tool available. Treat all volume estimates and examples as hypothetical until manually verified."
+
+**For each signal, run a targeted validation query that asks for:**
+- A specific, named real-world example (company name, date, location)
+- Concrete volume data (how many postings/announcements/filings exist right now)
+- Source where this signal is observable (which platform, database, or publication)
+
+**Example validation queries:**
+- Signal: "Estimator job posting open 60+ days" → "landscape estimator job postings open 60+ days Indeed ZipRecruiter 2025 2026. Find specific company names, locations, salary ranges, and how many are currently active."
+- Signal: "PE acquisition of landscape contractor" → "private equity acquisition commercial landscape contractor 2025 2026. Find specific deal announcements with PE firm name, target company, date, and deal size."
+- Signal: "Residential firm wins first commercial project" → "residential landscape company first commercial project win announcement 2025. Find specific company names and project details."
+
+**After validation, update each signal:**
+- Replace placeholder examples with real ones (or mark as "theoretical — no example found")
+- Update volume estimates with actual data
+- Refine the signal definition if validation reveals a better version (e.g., "any estimator posting" may be stronger than "posting open 60+ days")
+- Kill signals that cannot be validated and cannot be logically defended — better to have 6 validated signals than 10 with half theoretical
+
+---
+
+### Step 3c: Quality Gates
+
+Before finalizing the brief, verify:
 - Every signal has a recent real-world example cited, OR is explicitly marked as theoretical
 - Every signal includes volume estimate and GTM motion implication
 - Every signal includes decay rate and late-stage angle
@@ -64,6 +105,7 @@ Follow the template exactly — every section, every table, every validation che
 - Strategic recommendations follow "Do X instead of Y because Z" format
 - Competitive analysis identifies specific gaps the target can exploit
 - Research confidence assessment is honest about gaps
+- Validation loop results are incorporated — no signal still has placeholder data if search was available
 
 ### Step 4: Deliver
 
@@ -84,3 +126,9 @@ These are the failure modes that turn a sharp brief into generic slop. Avoid the
 - **Missing decay analysis**: A signal without a timing window is just trivia. When does outreach peak? When is it too late?
 - **Padded sections**: If a section doesn't add strategic value, cut it. The reader is a senior strategist, not a student.
 - **Fake confidence**: If research hit a dead end, say so in the confidence assessment. Intellectual honesty > completeness theater.
+
+## Reference Examples
+
+For a completed brief and a validated signal, see:
+- `References/example-brief-bobyard.md` — Full Strategic Intelligence Brief for bobyard.com
+- `References/example-signal-validation.md` — Deep validation of a single signal (landscape estimator job postings) with specific company examples, volume estimates, and confidence ratings
